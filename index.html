@@ -376,7 +376,7 @@
       <div class="lockbig">🔐</div>
       <h2>Reporte de la consultora</h2>
       <p>Este detalle es solo para A&amp;G. Ingresa tu PIN para ver el diagnóstico completo del cliente.</p>
-      <input type="password" id="pinInput" inputmode="numeric" placeholder="PIN" />
+      <input type="password" id="pinInput" autocapitalize="characters" autocomplete="off" autocorrect="off" placeholder="PIN" />
       <div class="pin-err" id="pinErr"></div>
       <button class="btn btn-primary" id="pinBtn" style="width:200px;">Ver reporte →</button>
     </div>
@@ -727,7 +727,7 @@ function renderReporte(){
 const pinBtn = document.getElementById('pinBtn');
 const pinInput = document.getElementById('pinInput');
 function tryPin(){
-  if(pinInput.value.trim() === CONFIG.PIN){
+  if(pinInput.value.trim().toUpperCase() === CONFIG.PIN.toUpperCase()){
     document.getElementById('pinGate').style.display = "none";
     document.getElementById('repContent').style.display = "block";
     renderReporte();
