@@ -193,11 +193,20 @@
       <div class="step-row"><div class="step-ico">🎯</div><div><b>Recibes tu diagnóstico</b><small>Tu score y tu punto más crítico</small></div></div>
     </div>
     <div class="field">
-      <label for="nombre">¿Cómo te llamas?</label>
-      <input type="text" id="nombre" placeholder="Tu nombre" autocomplete="given-name" />
+      <label for="nombre">Nombre completo</label>
+      <input type="text" id="nombre" placeholder="Tu nombre completo" autocomplete="name" />
     </div>
+    <div class="field">
+      <label for="email">Correo electrónico</label>
+      <input type="email" id="email" placeholder="tucorreo@ejemplo.com" autocomplete="email" inputmode="email" />
+    </div>
+    <div class="field">
+      <label for="telefono">Teléfono (WhatsApp)</label>
+      <input type="tel" id="telefono" placeholder="10 dígitos" autocomplete="tel" inputmode="tel" />
+    </div>
+    <p class="pin-err" id="welcomeErr" style="text-align:center;"></p>
     <button class="btn btn-primary" id="startBtn">Quiero saber cómo está mi negocio →</button>
-    <p class="privacy">🔒 Tus datos no se almacenan ni se comparten.</p>
+    <p class="privacy">🔒 Usamos tus datos solo para enviarte tu diagnóstico y darle seguimiento. No los compartimos con terceros.</p>
   </section>
 
   <!-- P2 INGRESOS -->
@@ -422,7 +431,10 @@ const CONFIG = {
   // Número de WhatsApp de A&G en formato internacional, SIN + ni espacios.
   WHATSAPP: "525525634306",
   // PIN para abrir el Reporte de la consultora (cámbialo por el que quieras).
-  PIN: "AG2026"
+  PIN: "AG2026",
+  // URL de la Hoja de Google (Apps Script) donde se guardan las respuestas.
+  // Se llena en la configuración de la base de datos. Si está vacío, no guarda nada.
+  SHEET_URL: ""
 };
 
 /* ============================================================
@@ -504,7 +516,7 @@ const CATEGORIAS = [
 /* ============================================================
    ESTADO
    ============================================================ */
-const state = { nombre:"", a1:null, a2:null, b1:null, b2:null, c1:null, c2:null, d:null, s1:3, s2:3 };
+const state = { nombre:"", email:"", telefono:"", a1:null, a2:null, b1:null, b2:null, c1:null, c2:null, d:null, s1:3, s2:3 };
 let current = 0;
 const TOTAL_STEPS = 6; // pasos con progreso (1..6), sin contar bienvenida/loading/resultado
 
@@ -557,7 +569,16 @@ document.querySelectorAll('[data-back]').forEach(b=>b.addEventListener('click',(
 
 /* Bienvenida */
 document.getElementById('startBtn').addEventListener('click',()=>{
-  state.nombre = document.getElementById('nombre').value.trim();
+  const nombre = document.getElementById('nombre').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const telefono = document.getElementById('telefono').value.trim();
+  const err = document.getElementById('welcomeErr');
+  const digitos = telefono.replace(/\D/g,'');
+  if(nombre.length < 3 || !nombre.includes(' ')){ err.textContent = "Escribe tu nombre completo (nombre y apellido)."; return; }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ err.textContent = "Escribe un correo electrónico válido."; return; }
+  if(digitos.length < 10){ err.textContent = "Escribe un teléfono de al menos 10 dígitos."; return; }
+  err.textContent = "";
+  state.nombre = nombre; state.email = email; state.telefono = telefono;
   showScreen(1);
 });
 
@@ -660,6 +681,23 @@ function mostrarResultado(){
   const repURL = location.origin + location.pathname + "#r=" + codificar();
   const msg = `Hola, acabo de hacer el Diagnóstico Financiero A&G${state.nombre? " ("+state.nombre+")":""} y obtuve ${r.score}/100. Me gustaría agendar la sesión para revisar mis resultados a detalle.\n\n(Detalle para mi consultora: ${repURL} )`;
   document.getElementById('waBtn').href = `https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent(msg)}`;
+
+  // Guardar la respuesta en la base de datos (Hoja de Google) si está configurada
+  if(CONFIG.SHEET_URL){
+    try{
+      fetch(CONFIG.SHEET_URL, {
+        method:'POST', mode:'no-cors',
+        headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body: JSON.stringify({
+          nombre: state.nombre, email: state.email, telefono: state.telefono,
+          score: r.score, categoria: r.cat.nombre,
+          pulso_caja: r.D.pulso, rentabilidad: r.D.rentabilidad, gastos: r.D.gastos,
+          mezcla_ingresos: r.D.mezcla, dependencia: r.D.dependencia, inteligencia: r.D.inteligencia,
+          codigo: codificar(), reporte: repURL
+        })
+      });
+    }catch(e){}
+  }
 
   // Animaciones (score count-up + anillo)
   setTimeout(()=>{
