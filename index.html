@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Diagnóstico Financiero A&amp;G</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --naranja:#FF7925;
+    --verde:#206A46;
+    --slate:#3F5965;
+    --menta:#D8E0DD;
+    --salmon:#FEF1ED;
+    --ambar:#F0A500;
+    --blanco:#FFFFFF;
+    --texto:#2C3A42;
+    --gris:#8A97A0;
+    --sombra:0 10px 30px rgba(63,89,101,.10);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    font-family:'DM Sans',system-ui,sans-serif;
+    color:var(--texto);
+    background:var(--salmon);
+    line-height:1.5;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,.display{font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:-.02em;line-height:1.15;}
+  .app{max-width:520px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;position:relative;}
+  .screen{display:none;flex:1;flex-direction:column;padding:28px 22px 40px;animation:fade .45s ease;}
+  .screen.active{display:flex;}
+  @keyframes fade{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+
+  /* Progress */
+  .progress-wrap{padding:16px 22px 4px;max-width:520px;margin:0 auto;width:100%;}
+  .progress-track{height:6px;background:var(--menta);border-radius:99px;overflow:hidden;}
+  .progress-bar{height:100%;width:0;background:var(--naranja);border-radius:99px;transition:width .5s cubic-bezier(.4,0,.2,1);}
+  .progress-wrap.hidden{display:none;}
+
+  /* Brand */
+  .brand{font-family:'Plus Jakarta Sans';font-weight:800;color:var(--slate);font-size:15px;letter-spacing:.02em;}
+  .brand span{color:var(--naranja);}
+
+  /* Welcome */
+  .hero-badge{display:inline-flex;align-items:center;gap:6px;background:#fff;color:var(--naranja);
+    font-weight:600;font-size:13px;padding:7px 14px;border-radius:99px;box-shadow:var(--sombra);margin-bottom:22px;width:fit-content;}
+  .welcome h1{font-size:31px;font-weight:800;color:var(--slate);margin-bottom:14px;}
+  .welcome .sub{font-size:17px;color:var(--slate);opacity:.75;margin-bottom:30px;}
+  .steps-visual{display:flex;flex-direction:column;gap:14px;margin-bottom:32px;}
+  .step-row{display:flex;align-items:center;gap:14px;background:#fff;border-radius:16px;padding:15px 16px;box-shadow:var(--sombra);}
+  .step-ico{font-size:22px;width:40px;height:40px;flex-shrink:0;display:grid;place-items:center;background:var(--salmon);border-radius:12px;}
+  .step-row b{font-family:'Plus Jakarta Sans';font-weight:700;color:var(--slate);font-size:15px;display:block;}
+  .step-row small{color:var(--gris);font-size:13px;}
+  .field{margin-bottom:22px;}
+  .field label{display:block;font-weight:600;color:var(--slate);margin-bottom:8px;font-size:15px;}
+  .field input{width:100%;padding:15px 16px;border:2px solid var(--menta);border-radius:14px;font-family:inherit;
+    font-size:16px;color:var(--texto);background:#fff;transition:border-color .2s;}
+  .field input:focus{outline:none;border-color:var(--naranja);}
+  .privacy{font-size:12.5px;color:var(--gris);text-align:center;margin-top:14px;}
+
+  /* Questions */
+  .q-eyebrow{font-weight:700;color:var(--naranja);font-size:13px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;}
+  .q-block{margin-bottom:26px;}
+  .q-block h2{font-size:20px;font-weight:700;color:var(--slate);margin-bottom:16px;}
+  .options{display:flex;flex-direction:column;gap:10px;}
+  .opt{display:flex;align-items:center;gap:12px;padding:15px 16px;border:2px solid var(--menta);border-radius:14px;
+    background:#fff;cursor:pointer;font-size:15.5px;color:var(--texto);transition:all .18s;font-weight:500;}
+  .opt:hover{border-color:#c3d0cb;}
+  .opt .dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--menta);flex-shrink:0;transition:all .18s;position:relative;}
+  .opt.selected{border-color:var(--naranja);background:var(--salmon);}
+  .opt.selected .dot{border-color:var(--naranja);background:var(--naranja);}
+  .opt.selected .dot::after{content:"";position:absolute;inset:4px;background:#fff;border-radius:50%;}
+
+  /* Slider */
+  .slider-card{background:#fff;border-radius:18px;padding:22px 20px;box-shadow:var(--sombra);margin-bottom:24px;}
+  .slider-card h3{font-size:17px;color:var(--slate);margin-bottom:6px;}
+  .slider-q{font-size:14px;color:var(--gris);margin-bottom:20px;}
+  .slider-value{font-family:'Plus Jakarta Sans';font-weight:700;color:var(--verde);font-size:16px;text-align:center;margin-bottom:14px;min-height:22px;}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:8px;border-radius:99px;
+    background:var(--menta);outline:none;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:28px;height:28px;border-radius:50%;
+    background:var(--verde);cursor:pointer;box-shadow:0 3px 8px rgba(32,106,70,.4);border:3px solid #fff;}
+  input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:var(--verde);cursor:pointer;border:3px solid #fff;}
+  .slider-ends{display:flex;justify-content:space-between;font-size:12px;color:var(--gris);margin-top:10px;}
+
+  /* Buttons */
+  .btn{display:block;width:100%;padding:17px;border:none;border-radius:14px;font-family:'Plus Jakarta Sans';
+    font-weight:700;font-size:16.5px;cursor:pointer;transition:transform .15s,box-shadow .2s,opacity .2s;text-align:center;text-decoration:none;}
+  .btn-primary{background:var(--naranja);color:#fff;box-shadow:0 8px 20px rgba(255,121,37,.35);}
+  .btn-primary:active{transform:scale(.98);}
+  .btn-primary:disabled{opacity:.4;box-shadow:none;cursor:not-allowed;}
+  .btn-wa{background:#25D366;color:#fff;box-shadow:0 8px 20px rgba(37,211,102,.35);display:flex;align-items:center;justify-content:center;gap:10px;}
+  .btn-ghost{background:transparent;color:var(--gris);font-weight:600;font-size:14px;padding:10px;}
+  .spacer{flex:1;}
+  .nav-bottom{margin-top:24px;}
+
+  /* Loading */
+  .loading{align-items:center;justify-content:center;text-align:center;}
+  .ring{width:80px;height:80px;border:6px solid var(--menta);border-top-color:var(--naranja);border-radius:50%;
+    animation:spin 1s linear infinite;margin-bottom:28px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .load-msg{font-family:'Plus Jakarta Sans';font-weight:700;font-size:19px;color:var(--slate);min-height:26px;transition:opacity .3s;}
+  .load-track{width:220px;height:6px;background:var(--menta);border-radius:99px;margin-top:26px;overflow:hidden;}
+  .load-fill{height:100%;width:0;background:var(--naranja);border-radius:99px;transition:width .4s;}
+
+  /* Result */
+  .result{align-items:center;text-align:center;}
+  .result .greet{font-size:15px;color:var(--gris);margin-bottom:4px;}
+  .result h2.title{font-size:22px;color:var(--slate);margin-bottom:26px;}
+  .score-ring{position:relative;width:200px;height:200px;margin-bottom:8px;}
+  .score-ring svg{transform:rotate(-90deg);}
+  .score-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .score-num .n{font-family:'Plus Jakarta Sans';font-weight:800;font-size:56px;color:var(--slate);line-height:1;}
+  .score-num .of{font-size:14px;color:var(--gris);margin-top:2px;}
+  .cat-badge{display:inline-block;padding:9px 20px;border-radius:99px;color:#fff;font-family:'Plus Jakarta Sans';
+    font-weight:700;font-size:15px;margin:18px 0 26px;}
+  .card{background:#fff;border-radius:18px;padding:22px 20px;box-shadow:var(--sombra);text-align:left;width:100%;margin-bottom:18px;}
+  .card .kicker{font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:7px;}
+  .card.critical .kicker{color:var(--naranja);}
+  .card.critical h3{font-family:'Plus Jakarta Sans';font-weight:800;color:var(--slate);font-size:21px;margin-bottom:10px;}
+  .card.critical p{font-size:15px;color:var(--texto);opacity:.9;}
+  .card.locked{background:linear-gradient(135deg,var(--slate),#33474f);color:#fff;}
+  .card.locked .kicker{color:#ffd9c4;}
+  .card.locked h3{font-family:'Plus Jakarta Sans';font-weight:800;font-size:19px;margin-bottom:14px;color:#fff;}
+  .locked-list{list-style:none;display:flex;flex-direction:column;gap:12px;}
+  .locked-list li{display:flex;align-items:flex-start;gap:11px;font-size:14.5px;color:#eef2f1;}
+  .locked-list .lk{flex-shrink:0;width:22px;height:22px;background:rgba(255,255,255,.14);border-radius:7px;display:grid;place-items:center;font-size:12px;}
+  .cta-note{font-size:14px;color:var(--slate);opacity:.8;margin:6px 0 16px;text-align:center;}
+  .footer{margin-top:28px;text-align:center;font-size:12.5px;color:var(--gris);line-height:1.7;}
+  .footer .fbrand{font-family:'Plus Jakarta Sans';font-weight:800;color:var(--slate);font-size:14px;}
+  .share{margin-top:6px;}
+
+  /* Reporte consultora */
+  .rep{background:#fff;}
+  .rep .app-inner{padding:26px 20px 46px;}
+  .pin-gate{align-items:center;justify-content:center;text-align:center;min-height:80dvh;}
+  .pin-gate .lockbig{font-size:44px;margin-bottom:14px;}
+  .pin-gate h2{color:var(--slate);font-size:22px;margin-bottom:8px;}
+  .pin-gate p{color:var(--gris);font-size:14px;margin-bottom:22px;max-width:300px;}
+  .pin-gate input{width:200px;text-align:center;letter-spacing:.25em;padding:14px;border:2px solid var(--menta);
+    border-radius:14px;font-size:18px;font-family:inherit;margin-bottom:14px;}
+  .pin-gate input:focus{outline:none;border-color:var(--slate);}
+  .pin-err{color:#c0392b;font-size:13px;min-height:18px;margin-bottom:10px;}
+  .rep-head{border-bottom:2px solid var(--menta);padding-bottom:18px;margin-bottom:20px;}
+  .rep-tag{font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--naranja);}
+  .rep-head h1{font-size:24px;color:var(--slate);margin:6px 0 14px;}
+  .rep-scoreline{display:flex;align-items:center;gap:14px;}
+  .rep-score{font-family:'Plus Jakarta Sans';font-weight:800;font-size:40px;line-height:1;}
+  .rep-catpill{padding:7px 14px;border-radius:99px;color:#fff;font-weight:700;font-size:13px;font-family:'Plus Jakarta Sans';}
+  .rep-two{display:flex;gap:12px;margin-bottom:22px;flex-wrap:wrap;}
+  .rep-mini{flex:1;min-width:150px;border-radius:14px;padding:14px 15px;border:2px solid var(--menta);}
+  .rep-mini.win{border-color:var(--verde);background:#f2f8f4;}
+  .rep-mini.risk{border-color:var(--naranja);background:var(--salmon);}
+  .rep-mini .lbl{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;}
+  .rep-mini.win .lbl{color:var(--verde);} .rep-mini.risk .lbl{color:var(--naranja);}
+  .rep-mini .val{font-family:'Plus Jakarta Sans';font-weight:700;color:var(--slate);font-size:16px;}
+  .rep-mini small{color:var(--gris);font-size:12px;}
+  .rep-sec-title{font-family:'Plus Jakarta Sans';font-weight:800;color:var(--slate);font-size:15px;margin:8px 0 12px;}
+  .dim-row{border:1.5px solid var(--menta);border-radius:14px;padding:14px 15px;margin-bottom:10px;}
+  .dim-row .top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px;}
+  .dim-row .dname{font-weight:700;color:var(--slate);font-size:14px;}
+  .dim-row .lvlpill{font-size:12px;font-weight:700;padding:4px 10px;border-radius:99px;color:#fff;white-space:nowrap;}
+  .dim-row .level-name{font-family:'Plus Jakarta Sans';font-weight:700;color:var(--slate);font-size:14.5px;margin-bottom:3px;}
+  .dim-row .level-desc{font-size:13px;color:var(--texto);opacity:.85;}
+  .rep-prod{background:var(--menta);border-radius:16px;padding:18px;margin-top:18px;}
+  .rep-prod .lbl{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--slate);margin-bottom:6px;}
+  .rep-prod .pname{font-family:'Plus Jakarta Sans';font-weight:800;color:var(--slate);font-size:17px;margin-bottom:8px;}
+  .rep-prod p{font-size:13.5px;color:var(--texto);}
+  .rep-print{margin-top:20px;}
+  @media print{.rep-print,.pin-gate{display:none!important;}}
+</style>
+</head>
+<body>
+
+<div class="progress-wrap hidden" id="progressWrap">
+  <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+</div>
+
+<div class="app">
+
+  <!-- P1 BIENVENIDA -->
+  <section class="screen active welcome" data-screen="0">
+    <div class="hero-badge">✨ Diagnóstico Financiero A&amp;G</div>
+    <h1>Descubre en 5 minutos si tu negocio está ganando lo que debería</h1>
+    <p class="sub">Sin contabilidad formal. Sin tecnicismos. Solo claridad.</p>
+    <div class="steps-visual">
+      <div class="step-row"><div class="step-ico">📊</div><div><b>Respondes con rangos</b><small>Aproximados, no cifras exactas</small></div></div>
+      <div class="step-row"><div class="step-ico">🤖</div><div><b>Analizamos 6 dimensiones</b><small>La salud financiera de tu negocio</small></div></div>
+      <div class="step-row"><div class="step-ico">🎯</div><div><b>Recibes tu diagnóstico</b><small>Tu score y tu punto más crítico</small></div></div>
+    </div>
+    <div class="field">
+      <label for="nombre">¿Cómo te llamas?</label>
+      <input type="text" id="nombre" placeholder="Tu nombre" autocomplete="given-name" />
+    </div>
+    <button class="btn btn-primary" id="startBtn">Quiero saber cómo está mi negocio →</button>
+    <p class="privacy">🔒 Tus datos no se almacenan ni se comparten.</p>
+  </section>
+
+  <!-- P2 INGRESOS -->
+  <section class="screen" data-screen="1">
+    <div class="q-eyebrow">Paso 1 · Ingresos</div>
+    <div class="q-block">
+      <h2>En un mes normal, ¿cuánto entra aproximadamente al negocio?</h2>
+      <div class="options" data-q="a1">
+        <label class="opt"><span class="dot"></span>Menos de $50,000</label>
+        <label class="opt"><span class="dot"></span>$50,000 – $150,000</label>
+        <label class="opt"><span class="dot"></span>$150,000 – $400,000</label>
+        <label class="opt"><span class="dot"></span>$400,000 – $800,000</label>
+        <label class="opt"><span class="dot"></span>Más de $800,000</label>
+      </div>
+    </div>
+    <div class="q-block">
+      <h2>De ese dinero, ¿qué parte llega puntual a tu cuenta?</h2>
+      <div class="options" data-q="a2">
+        <label class="opt" data-v="5"><span class="dot"></span>Casi todo</label>
+        <label class="opt" data-v="3"><span class="dot"></span>La mitad</label>
+        <label class="opt" data-v="2"><span class="dot"></span>Menos de la mitad</label>
+        <label class="opt" data-v="1"><span class="dot"></span>Muy poco</label>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn btn-primary nav-bottom" data-next disabled>Continuar →</button>
+    <button class="btn btn-ghost" data-back>← Atrás</button>
+  </section>
+
+  <!-- P3 GASTOS -->
+  <section class="screen" data-screen="2">
+    <div class="q-eyebrow">Paso 2 · Gastos</div>
+    <div class="q-block">
+      <h2>¿Más o menos cuánto gastas en el negocio cada mes?</h2>
+      <div class="options" data-q="b1">
+        <label class="opt"><span class="dot"></span>Menos de $30,000</label>
+        <label class="opt"><span class="dot"></span>$30,000 – $100,000</label>
+        <label class="opt"><span class="dot"></span>$100,000 – $250,000</label>
+        <label class="opt"><span class="dot"></span>$250,000 – $500,000</label>
+        <label class="opt"><span class="dot"></span>Más de $500,000</label>
+      </div>
+    </div>
+    <div class="q-block">
+      <h2>¿Cuánto de ese gasto podrías explicar si alguien te preguntara?</h2>
+      <div class="options" data-q="b2">
+        <label class="opt" data-v="5"><span class="dot"></span>Todo</label>
+        <label class="opt" data-v="4"><span class="dot"></span>La mayoría</label>
+        <label class="opt" data-v="3"><span class="dot"></span>La mitad</label>
+        <label class="opt" data-v="1"><span class="dot"></span>Poco o nada</label>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn btn-primary nav-bottom" data-next disabled>Continuar →</button>
+    <button class="btn btn-ghost" data-back>← Atrás</button>
+  </section>
+
+  <!-- P4 SUELDO / RENTABILIDAD -->
+  <section class="screen" data-screen="3">
+    <div class="q-eyebrow">Paso 3 · Rentabilidad</div>
+    <div class="q-block">
+      <h2>¿Te pagas un sueldo fijo como dueño/a?</h2>
+      <div class="options" data-q="c1">
+        <label class="opt" data-v="5"><span class="dot"></span>Sí, siempre</label>
+        <label class="opt" data-v="3"><span class="dot"></span>A veces</label>
+        <label class="opt" data-v="2"><span class="dot"></span>Casi nunca</label>
+        <label class="opt" data-v="1"><span class="dot"></span>No me pago</label>
+      </div>
+    </div>
+    <div class="q-block">
+      <h2>Al final del mes, después de pagar todo, ¿qué suele quedar?</h2>
+      <div class="options" data-q="c2">
+        <label class="opt" data-v="5"><span class="dot"></span>Hay excedente</label>
+        <label class="opt" data-v="4"><span class="dot"></span>Justo lo necesario</label>
+        <label class="opt" data-v="2"><span class="dot"></span>A veces falta</label>
+        <label class="opt" data-v="1"><span class="dot"></span>Casi siempre falta</label>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn btn-primary nav-bottom" data-next disabled>Continuar →</button>
+    <button class="btn btn-ghost" data-back>← Atrás</button>
+  </section>
+
+  <!-- P5 CONCENTRACIÓN -->
+  <section class="screen" data-screen="4">
+    <div class="q-eyebrow">Paso 4 · Solidez de ingresos</div>
+    <div class="q-block">
+      <h2>Si perdieras a tu cliente o producto más importante, ¿qué pasaría?</h2>
+      <div class="options" data-q="d">
+        <label class="opt" data-v="5"><span class="dot"></span>El negocio sobreviviría</label>
+        <label class="opt" data-v="3"><span class="dot"></span>Sería un golpe fuerte</label>
+        <label class="opt" data-v="2"><span class="dot"></span>Sería muy difícil</label>
+        <label class="opt" data-v="1"><span class="dot"></span>Sería un desastre</label>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn btn-primary nav-bottom" data-next disabled>Continuar →</button>
+    <button class="btn btn-ghost" data-back>← Atrás</button>
+  </section>
+
+  <!-- P6 SLIDERS -->
+  <section class="screen" data-screen="5">
+    <div class="q-eyebrow">Paso 5 · Tú y tus decisiones</div>
+    <div class="slider-card">
+      <h3>Dependencia del negocio de ti</h3>
+      <p class="slider-q">Si mañana no puedes ir al negocio por una semana, ¿qué pasa?</p>
+      <div class="slider-value" id="s1val">Avanza a medias</div>
+      <input type="range" id="s1" min="1" max="5" step="1" value="3" />
+      <div class="slider-ends"><span>Todo se detiene</span><span>Funciona sin mí</span></div>
+    </div>
+    <div class="slider-card">
+      <h3>Cómo tomas decisiones</h3>
+      <p class="slider-q">Cuando tienes que tomar una decisión de gasto importante, ¿qué haces?</p>
+      <div class="slider-value" id="s2val">Reviso algo de info</div>
+      <input type="range" id="s2" min="1" max="5" step="1" value="3" />
+      <div class="slider-ends"><span>Puro instinto</span><span>Tengo un sistema</span></div>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn btn-primary nav-bottom" id="finishBtn">Ver mi diagnóstico →</button>
+    <button class="btn btn-ghost" data-back>← Atrás</button>
+  </section>
+
+  <!-- P7 LOADING -->
+  <section class="screen loading" data-screen="6">
+    <div class="ring"></div>
+    <div class="load-msg" id="loadMsg">Analizando tu flujo de efectivo...</div>
+    <div class="load-track"><div class="load-fill" id="loadFill"></div></div>
+  </section>
+
+  <!-- P8 RESULTADO -->
+  <section class="screen result" data-screen="7">
+    <p class="greet" id="resGreet">Tu diagnóstico está listo</p>
+    <h2 class="title">Esto es lo que encontramos</h2>
+    <div class="score-ring">
+      <svg width="200" height="200" viewBox="0 0 200 200">
+        <circle cx="100" cy="100" r="88" fill="none" stroke="#EDE3DD" stroke-width="16"/>
+        <circle id="ringArc" cx="100" cy="100" r="88" fill="none" stroke="#FF7925" stroke-width="16"
+          stroke-linecap="round" stroke-dasharray="552.9" stroke-dashoffset="552.9"/>
+      </svg>
+      <div class="score-num"><span class="n" id="scoreNum">0</span><span class="of">de 100</span></div>
+    </div>
+    <div class="cat-badge" id="catBadge">—</div>
+
+    <div class="card critical">
+      <div class="kicker">⚠️ Tu punto más crítico</div>
+      <h3 id="critName">—</h3>
+      <p id="critMsg">—</p>
+    </div>
+
+    <div class="card locked">
+      <div class="kicker">🔒 Lo que este número todavía no te dice</div>
+      <h3>Tu diagnóstico completo lo revisamos juntos</h3>
+      <ul class="locked-list">
+        <li><span class="lk">✓</span><span>La lectura de tus <b>6 dimensiones</b>, no solo la más crítica</span></li>
+        <li><span class="lk">✓</span><span>Tu <b>mayor fortaleza</b> y cómo aprovecharla</span></li>
+        <li><span class="lk">✓</span><span>El <b>plan concreto</b> para tu negocio, paso a paso</span></li>
+      </ul>
+    </div>
+
+    <p class="cta-note">Un número solo puede engañar. En una sesión de 30 min revisamos tus resultados a detalle y qué significan para tu negocio.</p>
+    <a class="btn btn-wa" id="waBtn" href="#" target="_blank" rel="noopener">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M17.5 14.4c-.3-.2-1.7-.8-2-.9-.3-.1-.5-.2-.7.1-.2.3-.8.9-.9 1.1-.2.2-.3.2-.6.1-1.5-.7-2.4-1.3-3.4-3-.3-.4.3-.4.7-1.3.1-.2 0-.4 0-.6 0-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.1 3.3 5.2 4.6.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.4zM12 2C6.5 2 2 6.5 2 12c0 1.8.5 3.4 1.3 4.9L2 22l5.3-1.4c1.4.8 3 1.2 4.7 1.2 5.5 0 10-4.5 10-10S17.5 2 12 2z"/></svg>
+      Agendar mi sesión de resultados
+    </a>
+
+    <div class="footer">
+      <div class="fbrand">A&amp;G Consultoras</div>
+      agconsultoras.com · @agconsultoras
+      <div class="share"><button class="btn btn-ghost" id="restartBtn">↻ Hacer de nuevo</button></div>
+    </div>
+  </section>
+
+  <!-- REPORTE CONSULTORA (solo con PIN) -->
+  <section class="screen rep" data-screen="8">
+    <!-- PIN gate -->
+    <div class="pin-gate" id="pinGate">
+      <div class="lockbig">🔐</div>
+      <h2>Reporte de la consultora</h2>
+      <p>Este detalle es solo para A&amp;G. Ingresa tu PIN para ver el diagnóstico completo del cliente.</p>
+      <input type="password" id="pinInput" inputmode="numeric" placeholder="PIN" />
+      <div class="pin-err" id="pinErr"></div>
+      <button class="btn btn-primary" id="pinBtn" style="width:200px;">Ver reporte →</button>
+    </div>
+    <!-- Reporte -->
+    <div class="app-inner" id="repContent" style="display:none;">
+      <div class="rep-head">
+        <div class="rep-tag">Reporte para la sesión · A&amp;G</div>
+        <h1 id="repTitle">Diagnóstico completo</h1>
+        <div class="rep-scoreline">
+          <span class="rep-score" id="repScore">—</span>
+          <span class="rep-catpill" id="repCat">—</span>
+        </div>
+      </div>
+      <div class="rep-two">
+        <div class="rep-mini win">
+          <div class="lbl">💪 Mayor fortaleza</div>
+          <div class="val" id="repWin">—</div>
+          <small id="repWinLvl">—</small>
+        </div>
+        <div class="rep-mini risk">
+          <div class="lbl">⚠️ Área más crítica</div>
+          <div class="val" id="repRisk">—</div>
+          <small id="repRiskLvl">—</small>
+        </div>
+      </div>
+      <div class="rep-sec-title">Las 6 dimensiones a detalle</div>
+      <div id="repDims"></div>
+      <div class="rep-prod">
+        <div class="lbl">🎯 Para tu conversación de venta</div>
+        <div class="pname" id="repProd">—</div>
+        <p id="repProdNote">—</p>
+      </div>
+      <button class="btn btn-primary rep-print" onclick="window.print()">🖨️ Guardar / imprimir este reporte</button>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ============================================================
+   CONFIGURACIÓN — cambia esto antes de enviar al cliente
+   ============================================================ */
+const CONFIG = {
+  // Número de WhatsApp de A&G en formato internacional, SIN + ni espacios.
+  WHATSAPP: "525525634306",
+  // PIN para abrir el Reporte de la consultora (cámbialo por el que quieras).
+  PIN: "AG2026"
+};
+
+/* ============================================================
+   DATOS DE DIMENSIONES (nombres y ganchos — sin solución)
+   ============================================================ */
+const DIMS = {
+  pulso:       { nombre:"Pulso de Caja",         gancho:"Hay una desconexión entre lo que vendes y el dinero que realmente llega a tu cuenta. Es el tipo de fuga que no se ve hasta que aprieta — y saber exactamente dónde está es el primer paso para cerrarla." },
+  rentabilidad:{ nombre:"Rentabilidad Real",     gancho:"Es muy probable que tu negocio no te esté pagando lo que tu tiempo realmente vale. Trabajar mucho no siempre significa ganar — y el tamaño exacto de esa brecha suele sorprender." },
+  gastos:      { nombre:"Radiografía de Gastos",  gancho:"Hay una parte del dinero que sale cada mes que hoy no puedes explicar del todo. Ese “no sé bien en qué se va” casi siempre esconde la ganancia que te falta." },
+  mezcla:      { nombre:"Mezcla de Ingresos",     gancho:"Dependes demasiado de pocos clientes o productos. Es una fortaleza hoy y un riesgo enorme mañana — y hay formas concretas de blindarlo antes de que pase." },
+  dependencia: { nombre:"Dependencia del Dueño",  gancho:"Hoy el negocio depende demasiado de ti: tú eres el negocio. Eso limita cuánto puede crecer y cuánto puedes descansar — y es de lo primero que se puede cambiar." },
+  inteligencia:{ nombre:"Inteligencia para Decidir", gancho:"Hoy decides más con intuición que con datos. La intuición sirve, pero decidir a ciegas sobre precios y gastos cuesta dinero en silencio, mes con mes." }
+};
+
+/* Orden de prioridad para desempatar el área crítica (mayor peso primero) */
+const PRIORIDAD = ["pulso","rentabilidad","gastos","mezcla","dependencia","inteligencia"];
+
+/* Rúbricas completas (nivel 1→5) para el Reporte de la consultora */
+const RUBRICAS = {
+  pulso:[
+    {n:"Caja Fantasma",d:"Sus ventas existen en papel pero el dinero no aparece en la cuenta. No sabe cuándo va a cobrar ni cuánto tiene disponible hoy."},
+    {n:"Caja Impredecible",d:"A veces hay dinero, a veces no. Depende de que los clientes paguen a tiempo; cuando no lo hacen, el negocio se resiente."},
+    {n:"Caja Básica",d:"Generalmente tiene para cubrir gastos, pero no puede planear con anticipación ni sabe qué sobra después de pagar todo."},
+    {n:"Caja Estable",d:"Sabe aproximadamente cuánto entra cada mes y puede anticipar sus compromisos con cierta confianza."},
+    {n:"Caja Controlada",d:"Tiene visibilidad clara de su flujo: sabe cuánto entra, cuándo entra y cuánto queda libre para crecer o invertir."}
+  ],
+  rentabilidad:[
+    {n:"Trabajo Gratis",d:"El negocio opera pero no se paga un sueldo real. Si contara su tiempo como costo, estaría perdiendo dinero."},
+    {n:"Rentabilidad Ilusoria",d:"Hay ganancias en los números, pero no reflejan lo que cuesta operar. Si quitara su propio sueldo de los gastos, las ganancias desaparecerían."},
+    {n:"Rentabilidad Básica",d:"El negocio cubre costos y deja algo, pero el margen es tan ajustado que cualquier imprevisto lo elimina."},
+    {n:"Rentabilidad Sana",d:"Tiene margen real después de cubrir todos los costos, incluido su sueldo. El negocio genera excedente."},
+    {n:"Negocio que Sí Deja",d:"Conoce el margen exacto de cada producto o servicio y decide con base en qué es más rentable, no en qué se vende más."}
+  ],
+  gastos:[
+    {n:"Fuga Total",d:"La mayor parte de sus gastos no los sabe categorizar. El dinero desaparece sin dejar rastro claro."},
+    {n:"Fuga Parcial",d:"Identifica sus gastos grandes, pero hay un porcentaje importante que no puede explicar. Siente que gasta más de lo que debería."},
+    {n:"Control Parcial",d:"Tiene identificados la mayoría de sus gastos, pero no los revisa con regularidad ni sabe cuáles podrían reducirse."},
+    {n:"Gastos Visibles",d:"Sabe en qué se va el dinero y puede identificar qué gastos son necesarios y cuáles no. Los revisa ocasionalmente."},
+    {n:"Gastos Gobernados",d:"Cada peso tiene una categoría y un propósito. Revisa sus gastos regularmente y toma decisiones activas para optimizarlos."}
+  ],
+  mezcla:[
+    {n:"Un Solo Hilo",d:"El 80% o más de sus ingresos vienen de 1 o 2 clientes o productos. Si uno falla, el negocio falla con él."},
+    {n:"Concentración Peligrosa",d:"Tiene algo de variedad, pero sigue habiendo un cliente o producto que pesa demasiado. La dependencia es real aunque no la sienta."},
+    {n:"Dependencia Moderada",d:"Sus ingresos están distribuidos entre varios clientes o productos, aunque algunos pesan más que otros de forma notable."},
+    {n:"Mezcla Saludable",d:"Ningún cliente o producto representa más del 40% de sus ingresos. Si perdiera al más grande, el negocio seguiría vivo."},
+    {n:"Ingresos Blindados",d:"Ingresos diversificados por tipo de cliente, producto y frecuencia. El negocio no depende de nadie en particular."}
+  ],
+  dependencia:[
+    {n:"Tú Eres el Negocio",d:"Si no está, no hay operación, no hay información, no hay decisiones. Todo pasa por el dueño."},
+    {n:"Delegación Mínima",d:"Tiene algo de apoyo, pero las decisiones importantes y la información financiera siguen dependiendo de que él las gestione."},
+    {n:"Delegación Parcial",d:"Hay personas que apoyan en tareas operativas, pero la información financiera sigue siendo solo suya."},
+    {n:"Equipo Funcional",d:"El equipo puede operar sin él por períodos cortos y alguien más tiene acceso a la información básica del negocio."},
+    {n:"Negocio Independiente",d:"El negocio genera su propia información, tiene procesos claros y puede operar y reportar sin que el dueño esté presente."}
+  ],
+  inteligencia:[
+    {n:"Navegando sin Mapa",d:"Toma decisiones de gasto, inversión o precios por lo que se siente bien. No tiene datos que respalden sus elecciones."},
+    {n:"Intuición con Riesgo",d:"Usa algo de información pero es incompleta o llega tarde. Muchas veces el contador le dice qué pasó semanas después."},
+    {n:"Datos Parciales",d:"Tiene algunos indicadores, pero no están organizados en un solo lugar ni los consulta antes de decidir de forma sistemática."},
+    {n:"Decisiones Informadas",d:"Consulta información real antes de comprometerse con gastos importantes. No siempre es perfecta, pero es mejor que la intuición."},
+    {n:"Decisiones con Claridad Total",d:"Tiene un sistema claro que le muestra su situación financiera antes de decidir. Sabe qué preguntar y dónde encontrar la respuesta."}
+  ]
+};
+
+/* Producto sugerido según categoría (diseño original A&G) */
+const PRODUCTO_POR_CAT = [
+  "Claridad Financiera (C-07)",
+  "Claridad Financiera (C-07) + mención de Membresía Avanza",
+  "Membresía Avanza",
+  "Membresía Avanza o Avanza Plus"
+];
+
+const CATEGORIAS = [
+  { max:39,  nombre:"Negocio en Punto de Despegue",        color:"#FF7925" },
+  { max:59,  nombre:"Negocio con Potencial Sin Aprovechar", color:"#F0A500" },
+  { max:79,  nombre:"Negocio Ordenado, Listo para Crecer",  color:"#206A46" },
+  { max:100, nombre:"Negocio con Visión Financiera Clara",  color:"#3F5965" }
+];
+
+/* ============================================================
+   ESTADO
+   ============================================================ */
+const state = { nombre:"", a1:null, a2:null, b1:null, b2:null, c1:null, c2:null, d:null, s1:3, s2:3 };
+let current = 0;
+const TOTAL_STEPS = 6; // pasos con progreso (1..6), sin contar bienvenida/loading/resultado
+
+/* ============================================================
+   NAVEGACIÓN
+   ============================================================ */
+function showScreen(i){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelector('[data-screen="'+i+'"]').classList.add('active');
+  current = i;
+  window.scrollTo(0,0);
+  const pw = document.getElementById('progressWrap');
+  if(i>=1 && i<=6){
+    pw.classList.remove('hidden');
+    document.getElementById('progressBar').style.width = (i/TOTAL_STEPS*100)+"%";
+  } else {
+    pw.classList.add('hidden');
+  }
+}
+
+/* Opciones de respuesta */
+document.querySelectorAll('.options').forEach(group=>{
+  const key = group.dataset.q;
+  group.querySelectorAll('.opt').forEach((opt,idx)=>{
+    opt.addEventListener('click',()=>{
+      group.querySelectorAll('.opt').forEach(o=>o.classList.remove('selected'));
+      opt.classList.add('selected');
+      // valor: usa data-v si existe (dimensiones), si no usa índice (contexto)
+      state[key] = opt.dataset.v ? parseInt(opt.dataset.v,10) : idx+1;
+      // habilitar botón continuar si el paso está completo
+      checkStep();
+    });
+  });
+});
+
+function stepComplete(screen){
+  if(screen===1) return state.a1 && state.a2;
+  if(screen===2) return state.b1 && state.b2;
+  if(screen===3) return state.c1 && state.c2;
+  if(screen===4) return state.d;
+  return true;
+}
+function checkStep(){
+  const btn = document.querySelector('[data-screen="'+current+'"] [data-next]');
+  if(btn) btn.disabled = !stepComplete(current);
+}
+
+document.querySelectorAll('[data-next]').forEach(b=>b.addEventListener('click',()=>{ if(!b.disabled) showScreen(current+1); }));
+document.querySelectorAll('[data-back]').forEach(b=>b.addEventListener('click',()=>showScreen(current-1)));
+
+/* Bienvenida */
+document.getElementById('startBtn').addEventListener('click',()=>{
+  state.nombre = document.getElementById('nombre').value.trim();
+  showScreen(1);
+});
+
+/* Sliders */
+const s1labels = {1:"Todo se detiene",2:"Casi todo se frena",3:"Avanza a medias",4:"Sigue operando",5:"Funciona sin mí"};
+const s2labels = {1:"Puro instinto",2:"Pregunto por ahí",3:"Reviso algo de info",4:"Consulto mis números",5:"Tengo un sistema claro"};
+document.getElementById('s1').addEventListener('input',e=>{state.s1=+e.target.value;document.getElementById('s1val').textContent=s1labels[e.target.value];});
+document.getElementById('s2').addEventListener('input',e=>{state.s2=+e.target.value;document.getElementById('s2val').textContent=s2labels[e.target.value];});
+
+/* ============================================================
+   CÁLCULO DEL SCORE
+   ============================================================ */
+function calcular(){
+  const D = {
+    pulso:        Math.round((state.a2 + state.c2)/2),
+    rentabilidad: Math.round((state.c1 + state.c2)/2),
+    gastos:       state.b2,
+    mezcla:       state.d,
+    dependencia:  state.s1,
+    inteligencia: state.s2
+  };
+  // Pesos: 25,25,20,10,10,10 → suma 100. score = Σ(D*peso)/5  → rango 20–100
+  const score = Math.round(
+    (D.pulso*25 + D.rentabilidad*25 + D.gastos*20 + D.mezcla*10 + D.dependencia*10 + D.inteligencia*10) / 5
+  );
+  // Área crítica: menor D; desempate por prioridad (mayor peso primero)
+  let critica = PRIORIDAD[0], min = 6;
+  PRIORIDAD.forEach(k=>{ if(D[k] < min){ min = D[k]; critica = k; } });
+  // Fortaleza: mayor D; desempate por prioridad
+  let fortaleza = PRIORIDAD[0], max = 0;
+  PRIORIDAD.forEach(k=>{ if(D[k] > max){ max = D[k]; fortaleza = k; } });
+  // Categoría
+  const catIndex = CATEGORIAS.findIndex(c=>score<=c.max);
+  const cat = CATEGORIAS[catIndex];
+  return { score, critica, fortaleza, cat, catIndex, D };
+}
+
+/* Codificar / decodificar respuestas (9 dígitos 1-5) para el enlace de la consultora */
+const ORDEN = ["a1","a2","b1","b2","c1","c2","d","s1","s2"];
+function codificar(){ return ORDEN.map(k=>state[k]||3).join(""); }
+function decodificar(code){
+  if(!/^[1-5]{9}$/.test(code)) return false;
+  ORDEN.forEach((k,i)=>{ state[k] = parseInt(code[i],10); });
+  return true;
+}
+
+/* ============================================================
+   LOADING → RESULTADO
+   ============================================================ */
+const loadMsgs = [
+  "Analizando tu flujo de efectivo...",
+  "Calculando tu rentabilidad real...",
+  "Detectando fugas en tus gastos...",
+  "Evaluando la solidez de tus ingresos...",
+  "Tu diagnóstico está listo. Casi..."
+];
+document.getElementById('finishBtn').addEventListener('click',()=>{
+  showScreen(6);
+  let i=0;
+  const msgEl=document.getElementById('loadMsg'), fillEl=document.getElementById('loadFill');
+  fillEl.style.width="8%";
+  const iv=setInterval(()=>{
+    i++;
+    if(i<loadMsgs.length){
+      msgEl.style.opacity=0;
+      setTimeout(()=>{msgEl.textContent=loadMsgs[i];msgEl.style.opacity=1;},250);
+      fillEl.style.width=(8 + i*22)+"%";
+    } else {
+      clearInterval(iv);
+      fillEl.style.width="95%";
+      setTimeout(mostrarResultado,600);
+    }
+  },1600);
+});
+
+function mostrarResultado(){
+  const r = calcular();
+  showScreen(7);
+
+  // Saludo
+  document.getElementById('resGreet').textContent = state.nombre
+    ? state.nombre + ", tu diagnóstico está listo" : "Tu diagnóstico está listo";
+
+  // Anillo + color por categoría
+  const arc = document.getElementById('ringArc');
+  const circ = 2*Math.PI*88; // 552.9
+  arc.style.stroke = r.cat.color;
+  document.getElementById('scoreNum').style.color = r.cat.color;
+
+  // Badge categoría
+  const badge = document.getElementById('catBadge');
+  badge.textContent = r.cat.nombre;
+  badge.style.background = r.cat.color;
+
+  // Área crítica
+  document.getElementById('critName').textContent = DIMS[r.critica].nombre;
+  document.getElementById('critMsg').textContent = DIMS[r.critica].gancho;
+
+  // WhatsApp — incluye enlace al reporte de la consultora (codificado + protegido por PIN)
+  const repURL = location.origin + location.pathname + "#r=" + codificar();
+  const msg = `Hola, acabo de hacer el Diagnóstico Financiero A&G${state.nombre? " ("+state.nombre+")":""} y obtuve ${r.score}/100. Me gustaría agendar la sesión para revisar mis resultados a detalle.\n\n(Detalle para mi consultora: ${repURL} )`;
+  document.getElementById('waBtn').href = `https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent(msg)}`;
+
+  // Animaciones (score count-up + anillo)
+  setTimeout(()=>{
+    arc.style.transition="stroke-dashoffset 1.4s cubic-bezier(.4,0,.2,1)";
+    arc.style.strokeDashoffset = circ - (circ * r.score/100);
+    let n=0; const target=r.score;
+    const step=Math.max(1,Math.round(target/40));
+    const cnt=setInterval(()=>{
+      n+=step; if(n>=target){n=target;clearInterval(cnt);}
+      document.getElementById('scoreNum').textContent=n;
+    },30);
+  },200);
+}
+
+/* Reiniciar */
+document.getElementById('restartBtn').addEventListener('click',()=>{location.hash="";location.reload();});
+
+/* ============================================================
+   REPORTE DE LA CONSULTORA (protegido por PIN)
+   ============================================================ */
+function renderReporte(){
+  const r = calcular();
+  document.getElementById('repTitle').textContent = state.nombre
+    ? "Diagnóstico completo · " + state.nombre : "Diagnóstico completo del cliente";
+  document.getElementById('repScore').textContent = r.score + "/100";
+  document.getElementById('repScore').style.color = r.cat.color;
+  const cp = document.getElementById('repCat');
+  cp.textContent = r.cat.nombre; cp.style.background = r.cat.color;
+
+  // Fortaleza / área crítica
+  document.getElementById('repWin').textContent = DIMS[r.fortaleza].nombre;
+  document.getElementById('repWinLvl').textContent =
+    "Nivel " + r.D[r.fortaleza] + "/5 · " + RUBRICAS[r.fortaleza][r.D[r.fortaleza]-1].n;
+  document.getElementById('repRisk').textContent = DIMS[r.critica].nombre;
+  document.getElementById('repRiskLvl').textContent =
+    "Nivel " + r.D[r.critica] + "/5 · " + RUBRICAS[r.critica][r.D[r.critica]-1].n;
+
+  // Las 6 dimensiones
+  const cont = document.getElementById('repDims');
+  cont.innerHTML = "";
+  PRIORIDAD.forEach(k=>{
+    const lvl = r.D[k];
+    const rub = RUBRICAS[k][lvl-1];
+    // color del pill: 1-2 naranja, 3 ámbar, 4-5 verde
+    const col = lvl<=2 ? "#FF7925" : (lvl===3 ? "#F0A500" : "#206A46");
+    const row = document.createElement('div');
+    row.className = "dim-row";
+    row.innerHTML =
+      '<div class="top"><span class="dname">'+DIMS[k].nombre+'</span>'+
+      '<span class="lvlpill" style="background:'+col+'">Nivel '+lvl+'/5</span></div>'+
+      '<div class="level-name">'+rub.n+'</div>'+
+      '<div class="level-desc">'+rub.d+'</div>';
+    cont.appendChild(row);
+  });
+
+  // Producto / nota de venta
+  document.getElementById('repProd').textContent = PRODUCTO_POR_CAT[r.catIndex];
+  let nota = "El mensaje de WhatsApp NO menciona producto: la venta ocurre aquí, en la sesión. Abre por la fortaleza, aterriza en el área crítica y conecta con la mentoría.";
+  if(r.D.dependencia<=2){
+    nota += " Ojo: 'Dependencia del Dueño' está muy baja — el negocio depende del dueño para todo. Es el encaje perfecto para «Emprende con Propósito».";
+  }
+  document.getElementById('repProdNote').textContent = nota;
+}
+
+const pinBtn = document.getElementById('pinBtn');
+const pinInput = document.getElementById('pinInput');
+function tryPin(){
+  if(pinInput.value.trim() === CONFIG.PIN){
+    document.getElementById('pinGate').style.display = "none";
+    document.getElementById('repContent').style.display = "block";
+    renderReporte();
+    window.scrollTo(0,0);
+  } else {
+    document.getElementById('pinErr').textContent = "PIN incorrecto. Intenta de nuevo.";
+    pinInput.value = ""; pinInput.focus();
+  }
+}
+pinBtn.addEventListener('click',tryPin);
+pinInput.addEventListener('keydown',e=>{ if(e.key==="Enter") tryPin(); });
+
+/* Al cargar: si viene #r=CODE, abrir el reporte de la consultora (con PIN) */
+(function(){
+  const m = location.hash.match(/r=([1-5]{9})/);
+  if(m && decodificar(m[1])){
+    showScreen(8);
+    setTimeout(()=>pinInput.focus(),300);
+  }
+})();
+</script>
+</body>
+</html>
